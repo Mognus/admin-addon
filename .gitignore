@@ -1,0 +1,7 @@
+# Symlinks
+node_modules
+.prettierrc
+.prettierignore
+
+# Module-specific tsconfig
+tsconfig.json
