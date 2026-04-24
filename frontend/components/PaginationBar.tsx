@@ -1,7 +1,7 @@
 "use client";
 
 import { Rows3, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from "lucide-react";
-import { ActionButton } from "@/addons/ui-core-addon/frontend/components/ActionButton";
+import { ActionButton } from "@/addons/ui-core-addon/frontend/components/action-button";
 import {
     Select,
     SelectContent,

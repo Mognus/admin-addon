@@ -2,7 +2,7 @@
 
 import { Columns3 } from "lucide-react";
 import { type Table } from "@tanstack/react-table";
-import { ActionButton } from "@/addons/ui-core-addon/frontend/components/ActionButton";
+import { ActionButton } from "@/addons/ui-core-addon/frontend/components/action-button";
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,

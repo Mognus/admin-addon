@@ -4,7 +4,7 @@ import { useState } from "react";
 import { mutate } from "swr";
 import { Modal } from "@/components/Modal";
 import { Plus } from "lucide-react";
-import { ActionButton } from "@/addons/ui-core-addon/frontend/components/ActionButton";
+import { ActionButton } from "@/addons/ui-core-addon/frontend/components/action-button";
 import { Button } from "@/components/ui/button";
 import { SchemaForm } from "./SchemaForm";
 import { createRecord, createRecordMultipart } from "../lib/api";

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { mutate } from "swr";
 import { Modal } from "@/components/Modal";
-import { ActionButton } from "@/addons/ui-core-addon/frontend/components/ActionButton";
+import { ActionButton } from "@/addons/ui-core-addon/frontend/components/action-button";
 import { Button } from "@/components/ui/button";
 import { deleteRecord } from "../lib/api";
 

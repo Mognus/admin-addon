@@ -11,7 +11,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { ActionButton } from "@/addons/ui-core-addon/frontend/components/ActionButton";
+import { ActionButton } from "@/addons/ui-core-addon/frontend/components/action-button";
 import type { Schema } from "../types";
 
 interface SearchBarProps {
