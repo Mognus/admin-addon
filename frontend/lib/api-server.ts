@@ -50,8 +50,15 @@ export async function fetchAdminSchema(model: string): Promise<AdminSchema> {
     });
 }
 
-export async function fetchAdminList(model: string): Promise<AdminListResponse> {
-    return serverFetch<AdminListResponse>(`/admin/${encodeURIComponent(model)}`, {
+interface AdminListParams {
+    page?: number;
+    limit?: number;
+}
+
+export async function fetchAdminList(model: string, params: AdminListParams = {}): Promise<AdminListResponse> {
+    const { page = 1, limit = 20 } = params;
+    const query = new URLSearchParams({ page: String(page), limit: String(limit) });
+    return serverFetch<AdminListResponse>(`/admin/${encodeURIComponent(model)}?${query}`, {
         withAuth: true,
     });
 }
