@@ -5,6 +5,11 @@ export interface AdminModel {
     displayName: string;
 }
 
+export interface AdminSelectOption {
+    value: string | number;
+    label: string;
+}
+
 export interface AdminField {
     name: string;
     type: string;
@@ -14,6 +19,7 @@ export interface AdminField {
     tableHidden?: boolean;
     editHidden?: boolean;
     createHidden?: boolean;
+    options?: AdminSelectOption[];
 }
 
 export interface AdminSchema {
@@ -55,6 +61,7 @@ interface AdminListParams {
     limit?: number;
     filters?: Record<string, string>;
 }
+
 
 export async function fetchAdminList(model: string, params: AdminListParams = {}): Promise<AdminListResponse> {
     const { page = 1, limit = 20, filters = {} } = params;
