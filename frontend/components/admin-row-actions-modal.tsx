@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Modal } from "@/addons/ui-core-addon/frontend/components/modal/modal";
 import { Button } from "@/addons/ui-core-addon/frontend/components/primitives/buttons/button";
 import { toastError } from "@/lib/api/toast";
 import { fetchAdminUpdate, fetchAdminDelete } from "../lib/api-client";
 import type { AdminRecord, AdminSchema } from "../lib/api-server";
-import { FormField } from "./form-field";
+import { FormField } from "@/addons/ui-core-addon/frontend/domains/form/form-field";
+import { generateZodSchema } from "@/addons/ui-core-addon/frontend/domains/form/schema-generator";
 
 interface AdminRowActionsModalProps {
     schema: AdminSchema;
@@ -19,55 +22,61 @@ interface AdminRowActionsModalProps {
 
 export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, onDeleted }: AdminRowActionsModalProps) {
     const editFields = schema.fields.filter((f) => !f.editHidden);
-
-    const [values, setValues] = useState<AdminRecord>(() =>
-        Object.fromEntries(editFields.map((f) => [f.name, row[f.name] ?? ""])),
-    );
-    const [loading, setLoading] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
 
-    function handleChange(key: string, value: unknown) {
-        setValues((v) => ({ ...v, [key]: value }));
-    }
+    const zodSchema = generateZodSchema(editFields);
 
-    async function handleUpdate() {
-        setLoading(true);
+    const { control, handleSubmit, formState: { isSubmitting, errors } } = useForm({
+        resolver: zodResolver(zodSchema),
+        defaultValues: Object.fromEntries(
+            editFields.map((f) => [f.name, row[f.name] ?? ""]),
+        ),
+    });
+
+    async function onSubmit(values: Record<string, unknown>) {
         try {
-            const id = row.id as string | number;
-            await fetchAdminUpdate(schema.name, id, values);
+            await fetchAdminUpdate(schema.name, row.id as string | number, values);
             onUpdated?.();
             onClose();
         } catch (e) {
             toastError(e);
-        } finally {
-            setLoading(false);
         }
     }
 
     async function handleDelete() {
-        setLoading(true);
         try {
-            const id = row.id as string | number;
-            await fetchAdminDelete(schema.name, id);
+            await fetchAdminDelete(schema.name, row.id as string | number);
             onDeleted?.();
             onClose();
         } catch (e) {
             toastError(e);
         } finally {
-            setLoading(false);
             setConfirmDelete(false);
         }
     }
 
     return (
         <Modal open={open} onClose={onClose} title={`Edit ${schema.displayName}`} className="w-full max-w-lg">
-            <div className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 {editFields.map((field) => (
-                    <FormField
+                    <Controller
                         key={field.name}
-                        field={field}
-                        value={values[field.name]}
-                        onChange={(v) => handleChange(field.name, v)}
+                        name={field.name}
+                        control={control}
+                        render={({ field: ctrl }) => (
+                            <div className="flex flex-col gap-1">
+                                <FormField
+                                    field={field}
+                                    value={ctrl.value}
+                                    onChange={ctrl.onChange}
+                                />
+                                {errors[field.name] && (
+                                    <span className="text-xs text-destructive">
+                                        {errors[field.name]?.message as string}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     />
                 ))}
 
@@ -77,13 +86,14 @@ export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, on
                             <div className="flex items-center gap-2">
                                 <span className="text-sm text-muted-foreground">Sure?</span>
                                 <Button
+                                    type="button"
                                     onClick={handleDelete}
-                                    disabled={loading}
                                     className="border border-destructive px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
                                 >
-                                    {loading ? "Deleting..." : "Yes, delete"}
+                                    Yes, delete
                                 </Button>
                                 <Button
+                                    type="button"
                                     onClick={() => setConfirmDelete(false)}
                                     className="border border-input px-3 py-1.5 text-sm hover:bg-accent"
                                 >
@@ -93,6 +103,7 @@ export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, on
                         )
                         : (
                             <Button
+                                type="button"
                                 onClick={() => setConfirmDelete(true)}
                                 className="border border-destructive px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10"
                             >
@@ -101,19 +112,15 @@ export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, on
                         )}
 
                     <div className="flex gap-2">
-                        <Button onClick={onClose} className="border border-input px-4 py-2 text-sm hover:bg-accent">
+                        <Button type="button" onClick={onClose} className="border border-input px-4 py-2 text-sm hover:bg-accent">
                             Cancel
                         </Button>
-                        <Button
-                            onClick={handleUpdate}
-                            disabled={loading}
-                            className="bg-foreground px-4 py-2 text-sm text-background hover:opacity-80"
-                        >
-                            {loading ? "Saving..." : "Save"}
+                        <Button type="submit" disabled={isSubmitting} className="bg-foreground px-4 py-2 text-sm text-background hover:opacity-80">
+                            {isSubmitting ? "Saving..." : "Save"}
                         </Button>
                     </div>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }

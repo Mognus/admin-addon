@@ -1,25 +1,19 @@
 import { serverFetch } from "@/lib/api/api-server";
+import type { FieldDefinition, SelectOption } from "@/addons/ui-core-addon/frontend/domains/form/field-definition";
+
+export type { FieldDefinition, SelectOption };
 
 export interface AdminModel {
     name: string;
     displayName: string;
 }
 
-export interface AdminSelectOption {
-    value: string | number;
-    label: string;
-}
+export type AdminSelectOption = SelectOption;
 
-export interface AdminField {
-    name: string;
-    type: string;
-    label: string;
-    required: boolean;
-    readonly: boolean;
+export interface AdminField extends FieldDefinition {
     tableHidden?: boolean;
     editHidden?: boolean;
     createHidden?: boolean;
-    options?: AdminSelectOption[];
 }
 
 export interface AdminSchema {

@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { Modal } from "@/addons/ui-core-addon/frontend/components/modal/modal";
 import { Button } from "@/addons/ui-core-addon/frontend/components/primitives/buttons/button";
 import { toastError } from "@/lib/api/toast";
 import { fetchAdminCreate } from "../lib/api-client";
 import type { AdminSchema } from "../lib/api-server";
-import { FormField } from "./form-field";
+import { FormField } from "@/addons/ui-core-addon/frontend/domains/form/form-field";
+import { generateZodSchema } from "@/addons/ui-core-addon/frontend/domains/form/schema-generator";
 
 interface AdminAddModalProps {
     schema: AdminSchema;
@@ -19,51 +22,59 @@ interface AdminAddModalProps {
 function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModalProps) {
     const fields = schema.fields.filter((f) => !f.readonly && !f.createHidden);
 
-    const initialValues = Object.fromEntries(
-        fields.map((f) => [f.name, f.type === "boolean" ? false : ""]),
-    );
+    const zodSchema = generateZodSchema(fields);
 
-    const [values, setValues] = useState<Record<string, unknown>>(initialValues);
-    const [loading, setLoading] = useState(false);
+    const { control, handleSubmit, reset, formState: { isSubmitting, errors } } = useForm({
+        resolver: zodResolver(zodSchema),
+        defaultValues: Object.fromEntries(
+            fields.map((f) => [f.name, f.type === "boolean" ? false : ""]),
+        ),
+    });
 
-    function handleChange(key: string, value: unknown) {
-        setValues((v) => ({ ...v, [key]: value }));
-    }
-
-    async function handleSubmit() {
-        setLoading(true);
+    async function onSubmit(values: Record<string, unknown>) {
         try {
             await fetchAdminCreate(schema.name, values);
-            setValues(initialValues);
+            reset();
             onCreated?.();
             onClose();
         } catch (e) {
             toastError(e);
-        } finally {
-            setLoading(false);
         }
     }
 
     return (
         <Modal open={open} onClose={onClose} title={`Add ${schema.displayName}`} className="w-full max-w-lg">
-            <div className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
                 {fields.map((field) => (
-                    <FormField
+                    <Controller
                         key={field.name}
-                        field={field}
-                        value={values[field.name]}
-                        onChange={(v) => handleChange(field.name, v)}
+                        name={field.name}
+                        control={control}
+                        render={({ field: ctrl }) => (
+                            <div className="flex flex-col gap-1">
+                                <FormField
+                                    field={field}
+                                    value={ctrl.value}
+                                    onChange={ctrl.onChange}
+                                />
+                                {errors[field.name] && (
+                                    <span className="text-xs text-destructive">
+                                        {errors[field.name]?.message as string}
+                                    </span>
+                                )}
+                            </div>
+                        )}
                     />
                 ))}
                 <div className="flex justify-end gap-2 pt-2">
-                    <Button onClick={onClose} className="border border-input px-4 py-2 text-sm hover:bg-accent">
+                    <Button type="button" onClick={onClose} className="border border-input px-4 py-2 text-sm hover:bg-accent">
                         Cancel
                     </Button>
-                    <Button onClick={handleSubmit} disabled={loading} className="bg-foreground px-4 py-2 text-sm text-background hover:opacity-80">
-                        {loading ? "Saving..." : "Save"}
+                    <Button type="submit" disabled={isSubmitting} className="bg-foreground px-4 py-2 text-sm text-background hover:opacity-80">
+                        {isSubmitting ? "Saving..." : "Save"}
                     </Button>
                 </div>
-            </div>
+            </form>
         </Modal>
     );
 }
