@@ -6,6 +6,7 @@ import { useAdminTable } from "../hooks/useAdminTable";
 import type { AdminRenderers } from "../hooks/useAdminTable";
 import type { AdminRecord, AdminSchema } from "../lib/api-server";
 import { AdminAddTrigger } from "./admin-add-trigger";
+import { AdminRowActionsModal } from "./admin-row-actions-modal";
 
 interface AdminDataTableProps {
     schema: AdminSchema;
@@ -27,6 +28,16 @@ export function AdminDataTable({ schema, rows, total, renderers, className, defa
             rows={rows}
             getRowKey={(row, index) => String(row.id ?? index)}
             total={total}
+            rowActions={(row, onClose) => (
+                <AdminRowActionsModal
+                    schema={schema}
+                    row={row as AdminRecord}
+                    open={true}
+                    onClose={onClose}
+                    onUpdated={() => { onClose(); router.refresh(); }}
+                    onDeleted={() => { onClose(); router.refresh(); }}
+                />
+            )}
             addTrigger={<AdminAddTrigger schema={schema} onCreated={() => router.refresh()} />}
             className={className}
             tableProps={{ classNames: { th: "font-syne uppercase tracking-[0.15em]" } }}
