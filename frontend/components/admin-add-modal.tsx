@@ -5,6 +5,7 @@ import { Modal } from "@/addons/ui-core-addon/frontend/components/modal/modal";
 import { Button } from "@/addons/ui-core-addon/frontend/components/primitives/buttons/button";
 import { Select } from "@/addons/ui-core-addon/frontend/components/select/select";
 import { TextInput } from "@/addons/ui-core-addon/frontend/components/primitives/input/text-input";
+import { toastError } from "@/lib/api/toast";
 import { fetchAdminCreate } from "../lib/api-client";
 import type { AdminField, AdminSchema } from "../lib/api-server";
 
@@ -70,7 +71,6 @@ export function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModa
     );
 
     const [values, setValues] = useState<Record<string, unknown>>(initialValues);
-    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
     function handleChange(key: string, value: unknown) {
@@ -79,14 +79,13 @@ export function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModa
 
     async function handleSubmit() {
         setLoading(true);
-        setError(null);
         try {
             await fetchAdminCreate(schema.name, values);
             setValues(initialValues);
             onCreated?.();
             onClose();
         } catch (e) {
-            setError(e instanceof Error ? e.message : "Error");
+            toastError(e);
         } finally {
             setLoading(false);
         }
@@ -103,7 +102,6 @@ export function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModa
                         onChange={(v) => handleChange(field.name, v)}
                     />
                 ))}
-                {error && <p className="text-sm text-destructive">{error}</p>}
                 <div className="flex justify-end gap-2 pt-2">
                     <Button onClick={onClose} className="border border-input px-4 py-2 text-sm hover:bg-accent">
                         Cancel
