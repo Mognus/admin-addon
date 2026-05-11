@@ -59,7 +59,11 @@ interface AdminListParams {
 
 export async function fetchAdminList(model: string, params: AdminListParams = {}): Promise<AdminListResponse> {
     const { page = 1, limit = 20, filters = {} } = params;
-    const query = new URLSearchParams({ page: String(page), limit: String(limit), ...filters });
+    // grpc-gateway maps map<string,string> fields via filters[key]=value syntax
+    const filterParams = Object.fromEntries(
+        Object.entries(filters).map(([k, v]) => [`filters[${k}]`, v]),
+    );
+    const query = new URLSearchParams({ page: String(page), limit: String(limit), ...filterParams });
     return serverFetch<AdminListResponse>(`/admin/${encodeURIComponent(model)}?${query}`, {
         withAuth: true,
     });
