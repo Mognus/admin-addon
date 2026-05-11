@@ -45,28 +45,30 @@ function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModalProps)
     return (
         <Modal open={open} onClose={onClose} title={`Add ${schema.displayName}`} className="w-full max-w-lg">
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-                {fields.map((field) => (
-                    <Controller
-                        key={field.name}
-                        name={field.name}
-                        control={control}
-                        render={({ field: ctrl }) => (
-                            <div className="flex flex-col gap-1">
-                                <FormField
-                                    field={field}
-                                    value={ctrl.value}
-                                    onChange={ctrl.onChange}
-                                />
-                                {errors[field.name] && (
-                                    <span className="text-xs text-destructive">
-                                        {errors[field.name]?.message as string}
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                    />
-                ))}
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex max-h-[60vh] flex-col gap-4 overflow-y-auto">
+                    {fields.map((field) => (
+                        <Controller
+                            key={field.name}
+                            name={field.name}
+                            control={control}
+                            render={({ field: ctrl }) => (
+                                <div className="flex flex-col gap-1">
+                                    <FormField
+                                        field={field}
+                                        value={ctrl.value}
+                                        onChange={ctrl.onChange}
+                                    />
+                                    {errors[field.name] && (
+                                        <span className="text-xs text-destructive">
+                                            {errors[field.name]?.message as string}
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        />
+                    ))}
+                </div>
+                <div className="flex justify-end gap-2 border-t border-input pt-4">
                     <Button type="button" onClick={onClose} className="border border-input px-4 py-2 text-sm hover:bg-accent">
                         Cancel
                     </Button>
