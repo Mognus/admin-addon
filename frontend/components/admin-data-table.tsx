@@ -10,6 +10,7 @@ import { AdminRowActionsModal } from "./admin-row-actions-modal";
 
 interface AdminDataTableProps {
     schema: AdminSchema;
+    apiPath: string;
     rows: AdminRecord[];
     total: number;
     renderers?: AdminRenderers;
@@ -18,7 +19,7 @@ interface AdminDataTableProps {
     defaultLimit?: number;
 }
 
-export function AdminDataTable({ schema, rows, total, renderers, className, defaultPage, defaultLimit }: AdminDataTableProps) {
+export function AdminDataTable({ schema, apiPath, rows, total, renderers, className, defaultPage, defaultLimit }: AdminDataTableProps) {
     const router = useRouter();
     const table = useAdminTable({ schema, renderers, defaultPage, defaultLimit });
 
@@ -31,6 +32,7 @@ export function AdminDataTable({ schema, rows, total, renderers, className, defa
             rowActions={(row, onClose) => (
                 <AdminRowActionsModal
                     schema={schema}
+                    apiPath={apiPath}
                     row={row as AdminRecord}
                     open={true}
                     onClose={onClose}
@@ -38,7 +40,7 @@ export function AdminDataTable({ schema, rows, total, renderers, className, defa
                     onDeleted={() => { onClose(); router.refresh(); }}
                 />
             )}
-            addTrigger={<AdminAddTrigger schema={schema} onCreated={() => router.refresh()} />}
+            addTrigger={<AdminAddTrigger schema={schema} apiPath={apiPath} onCreated={() => router.refresh()} />}
             className={className}
             tableProps={{ classNames: { th: "font-syne uppercase tracking-[0.15em]" } }}
         />

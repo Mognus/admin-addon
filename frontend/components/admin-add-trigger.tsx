@@ -14,12 +14,13 @@ import { generateZodSchema } from "@/addons/ui-core-addon/frontend/domains/form/
 
 interface AdminAddModalProps {
     schema: AdminSchema;
+    apiPath: string;
     open: boolean;
     onClose: () => void;
     onCreated?: () => void;
 }
 
-function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModalProps) {
+function AdminAddModal({ schema, apiPath, open, onClose, onCreated }: AdminAddModalProps) {
     const fields = schema.fields.filter((f) => !f.readonly && !f.createHidden);
 
     const zodSchema = generateZodSchema(fields);
@@ -33,7 +34,7 @@ function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModalProps)
 
     async function onSubmit(values: Record<string, unknown>) {
         try {
-            await fetchAdminCreate(schema.name, values);
+            await fetchAdminCreate(apiPath, values);
             reset();
             onCreated?.();
             onClose();
@@ -83,10 +84,11 @@ function AdminAddModal({ schema, open, onClose, onCreated }: AdminAddModalProps)
 
 interface AdminAddTriggerProps {
     schema: AdminSchema;
+    apiPath: string;
     onCreated?: () => void;
 }
 
-export function AdminAddTrigger({ schema, onCreated }: AdminAddTriggerProps) {
+export function AdminAddTrigger({ schema, apiPath, onCreated }: AdminAddTriggerProps) {
     const [open, setOpen] = useState(false);
 
     return (
@@ -97,6 +99,7 @@ export function AdminAddTrigger({ schema, onCreated }: AdminAddTriggerProps) {
             </Button>
             <AdminAddModal
                 schema={schema}
+                apiPath={apiPath}
                 open={open}
                 onClose={() => setOpen(false)}
                 onCreated={onCreated}

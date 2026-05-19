@@ -13,6 +13,7 @@ import { generateZodSchema } from "@/addons/ui-core-addon/frontend/domains/form/
 
 interface AdminRowActionsModalProps {
     schema: AdminSchema;
+    apiPath: string;
     row: AdminRecord;
     open: boolean;
     onClose: () => void;
@@ -20,7 +21,7 @@ interface AdminRowActionsModalProps {
     onDeleted?: () => void;
 }
 
-export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, onDeleted }: AdminRowActionsModalProps) {
+export function AdminRowActionsModal({ schema, apiPath, row, open, onClose, onUpdated, onDeleted }: AdminRowActionsModalProps) {
     const editFields = schema.fields.filter((f) => !f.editHidden);
     const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -35,7 +36,7 @@ export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, on
 
     async function onSubmit(values: Record<string, unknown>) {
         try {
-            await fetchAdminUpdate(schema.name, row.id as string | number, values);
+            await fetchAdminUpdate(apiPath, row.id as string | number, values);
             onUpdated?.();
             onClose();
         } catch (e) {
@@ -45,7 +46,7 @@ export function AdminRowActionsModal({ schema, row, open, onClose, onUpdated, on
 
     async function handleDelete() {
         try {
-            await fetchAdminDelete(schema.name, row.id as string | number);
+            await fetchAdminDelete(apiPath, row.id as string | number);
             onDeleted?.();
             onClose();
         } catch (e) {
