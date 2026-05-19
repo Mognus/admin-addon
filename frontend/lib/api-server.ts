@@ -26,25 +26,23 @@ export interface AdminSchema {
 export type AdminRecord = Record<string, unknown>;
 
 export interface AdminListResponse {
-    items: AdminRecord[];
+    data: AdminRecord[];
     total: number;
-    page: number;
-    limit: number;
 }
 
 interface AdminListParams {
     page?: number;
-    limit?: number;
+    pageSize?: number;
     filters?: Record<string, string>;
 }
 
 
 export async function fetchAdminList(apiPath: string, params: AdminListParams = {}): Promise<AdminListResponse> {
-    const { page = 1, limit = 20, filters = {} } = params;
+    const { page = 1, pageSize = 20, filters = {} } = params;
     const filterParams = Object.fromEntries(
         Object.entries(filters).map(([k, v]) => [`filters[${k}]`, v]),
     );
-    const query = new URLSearchParams({ page: String(page), limit: String(limit), ...filterParams });
+    const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize), ...filterParams });
     return serverFetch<AdminListResponse>(`${apiPath}?${query}`, {
         withAuth: true,
     });
